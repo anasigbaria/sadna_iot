@@ -22,10 +22,8 @@ def main():
         if not ret:
             break
         time.sleep(0.1)
-        print "press"
         k=cv2.waitKey(1)
         if k%256 == 32:
-            print "pressed"
             img_name = "opencv_frame_{}.png".format(img_counter)
             cv2.imwrite(img_name, frame)
             print("{} written!".format(img_name))
@@ -33,8 +31,11 @@ def main():
             with open(img_name, "rb") as image:
                 f = image.read()
                 b = bytearray(f)
-
+            print len(b)
+            b+="finished"
             s.sendall(b)
+            #s.shutdown(socket.SHUT_WR)
+
 
             data = s.recv(BUFFER_SIZE)
             print str(data)
