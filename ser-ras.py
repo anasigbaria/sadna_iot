@@ -4,14 +4,15 @@ from PIL import Image
 import glob
 import time
 import numpy as np
+import os
+
 
 #HOST = '127.0.0.1'  # Standard loopback interface address (localhost)
 #PORT = 65432        # Port to listen on (non-privileged ports are > 1023)
 
 
-
+#the func takes a photo of a person and returns his name if there is a match in the database
 def compare_faces(picname):
-	print picname,"--"
 	unknown=face_recognition.load_image_file('./unknown/'+picname)#the image that we got from the bell
 	unknown_encoding=face_recognition.face_encodings(unknown)
 
@@ -21,10 +22,9 @@ def compare_faces(picname):
 		known_person=face_recognition.load_image_file(filename)
 		known_person_encoding=face_recognition.face_encodings(known_person)
 		if face_recognition.compare_faces(np.array(unknown_encoding),known_person_encoding)[0]:
-			print "gotcha"
-			return filename[8:len(filename)-4]#i should delete the photo if we find a match
-	print "ok"
-	return person_name
+			os.remove('./unknown/'+picname)#delete the photo from the unkown persons file
+			return filename[8:len(filename)-4]
+	return person_name #returns unknown
 
 
 
@@ -35,7 +35,6 @@ def compare_faces(picname):
 def main():	
 	TCP_IP = '127.0.0.1'
 	TCP_PORT = 5005
-	BUFFER_SIZE = 40960000  # picture size
 
 	c=0
 	for filename in glob.glob('./unknown/*.png'): #assuming jpg
