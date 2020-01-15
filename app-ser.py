@@ -64,7 +64,7 @@ def manage_vistors(data,conn):
         except:
             continue
 
-    b="#"+len(glob.glob('./unknown/*.png'))+"$"
+    b="#"+len(glob.glob('./unknown/*.png'))+"#"
     conn.sendall(b)
     b=""
 
@@ -74,7 +74,7 @@ def manage_vistors(data,conn):
                 f = image.read()
                 b = bytearray(f)
         #print len(b)
-        b+="finished"
+        b+="##"+filename1+"$$"
         conn.sendall(b)
         b=""
     
@@ -102,7 +102,7 @@ def delete_acc(data):
     os.remove("./accounts/"+name+".txt")
 
 def update_acc(data):
-    name=data[10:data.find(':')+1]
+    name=data[10:data.find(':')]
     myfile=open("./accounts/"+name+".txt")
     lines=myfile.readlines()
     flag=0
@@ -111,8 +111,31 @@ def update_acc(data):
             myfile.write(line)
         else:
             myfile.write(data[10+len(name):]+'\n')
+            flag=1
+    myfile.close()
 
 
+def add_vistor_to_acc(data):
+    name=data[17:data.find(':')]
+    phone=data[data.find(':')+1:]
+    myfile=open("./accounts/"+name+".txt")
+    lines=myfile.readlines()
+    flag=0
+    for line in lines:
+        if not flag:
+            myfile.write(line)
+            flag=1
+        else:
+            myfile.write(phone)
+            flag=1
+    myfile.close()
+
+def name_to(data):
+    filename=data[7:data.find('#')]
+    name=data[:data.find('#')+1:]
+    old_file = os.path.join("unknown", filename+'.png')
+    new_file = os.path.join("known", name+'.png')
+    os.rename(old_file, new_file)
 
 
 
@@ -123,8 +146,8 @@ def update_acc(data):
 
 
 def main():	
-    TCP_IP = '127.0.0.1'
-    TCP_PORT = 65432
+    TCP_IP = ''
+    TCP_PORT = 80
 
     c=0
     for filename in glob.glob('./unknown/*.png'): #assuming jpg
@@ -152,21 +175,27 @@ def main():
             if 'add_account' in data:
                 add_account(data,conn)
 
-            if 'manage_vistors' in data:
+            elif 'manage_vistors' in data:
                 manage_vistors(data,conn)
 
-            if 'vistors_accounts' in data:
+            elif 'vistors_accounts' in data:
                 vistors_accounts(data,conn)
 
-
-            if 'manage_accounts' in data:
+            elif 'manage_accounts' in data:
                 manage_accounts(data,conn)
 
-            if 'delete_acc' in data:
+            elif 'delete_acc' in data:
                 delete_acc(data)
 
-            if 'update_acc' in data:
+            elif 'update_acc' in data:
                 update_acc(data)
+            
+            elif 'add_vistor_to_acc' in data:
+                add_vistor_to_acc(data)
+            
+            elif 'name_to' in data:
+                name_to(data)
+
 
 
 
