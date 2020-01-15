@@ -14,8 +14,9 @@ def add_account(data,conn):
         if name in filename1:
             conn.sendall('user_exists')
             return
-    f= open(name+'.txt',"w+")
-    f.write(data[11+name+1:])
+    f= open('./accounts/'+name+'.txt',"w+")
+    f.write(data[11+len(name)+1:])
+    f.close()
     conn.sendall('success')
     
 
@@ -146,8 +147,8 @@ def name_to(data):
 
 
 def main():	
-    TCP_IP = ''
-    TCP_PORT = 80
+    TCP_IP = '127.0.0.1'
+    TCP_PORT = 65432
 
     c=0
     for filename in glob.glob('./unknown/*.png'): #assuming jpg
