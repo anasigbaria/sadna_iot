@@ -24,14 +24,16 @@ def vistors_accounts(data,conn):
     #first we delete similar faces so there is no duplications for the same person
     for filename1 in glob.glob('./unknown/*.png'): #assuming png
         try:
+            if filename1 not in glob.glob('./unknown/*.png'):
+                continue
             person1=face_recognition.load_image_file(filename1)
             person1_encoding=face_recognition.face_encodings(person1)
             for filename2 in glob.glob('./unknown/*.png'): #assuming png
                 if filename1!=filename2:
                     person2=face_recognition.load_image_file(filename2)
                     person2_encoding=face_recognition.face_encodings(person2)
-                if face_recognition.compare_faces(np.array(person2_encoding),person1_encoding)[0]:
-                    os.remove(filename2)#delete the photo from the unkown persons file
+                    if face_recognition.compare_faces(np.array(person2_encoding),person1_encoding)[0]:
+                        os.remove(filename2)#delete the photo from the unkown persons file
         except:
             continue
 
@@ -54,6 +56,8 @@ def manage_vistors(data,conn):
     #first we delete similar faces so there is no duplications for the same person
     for filename1 in glob.glob('./unknown/*.png'): #assuming png
         try:
+            if filename1 not in glob.glob('./unknown/*.png'):
+                continue
             person1=face_recognition.load_image_file(filename1)
             person1_encoding=face_recognition.face_encodings(person1)
             for filename2 in glob.glob('./unknown/*.png'): #assuming png
@@ -107,11 +111,12 @@ def update_acc(data):
     myfile=open("./accounts/"+name+".txt")
     lines=myfile.readlines()
     flag=0
+        
     for line in lines:
         if flag:
             myfile.write(line)
         else:
-            myfile.write(data[10+len(name):]+'\n')
+            myfile.write(data[10+len(name):]+'\n','w+')
             flag=1
     myfile.close()
 
@@ -127,7 +132,7 @@ def add_vistor_to_acc(data):
             myfile.write(line)
             flag=1
         else:
-            myfile.write(phone)
+            myfile.write(name+':'+phone)
             flag=1
     myfile.close()
 
@@ -147,61 +152,60 @@ def name_to(data):
 
 
 def main():	
-    TCP_IP = '127.0.0.1'
-    TCP_PORT = 65432
+    TCP_IP = ''
+    TCP_PORT = 80
 
     c=0
     for filename in glob.glob('./unknown/*.png'): #assuming jpg
         if int(filename[16:len(filename)-4])>c:
             c=int(filename[16:len(filename)-4])
         c+=1
-
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind((TCP_IP, TCP_PORT))
-    s.listen(1)
-
-    conn, addr = s.accept()
-    data=""
-    print ('Connection address:', addr)
     while 1:
+
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.bind((TCP_IP, TCP_PORT))
+        s.listen(1)
+
+        conn, addr = s.accept()
+        data=""
+        print ('Connection address:', addr)
         while 1:
-            temp = conn.recv(1024)
-            data+=temp
-            if (not temp) or ('finished' in data): break
-        print ("received data:", len(data))
-        if data:
-            #print len(data)
-            data=data.replace('finished','')
+            while not conn._closed():
+                temp = conn.recv(1024)
+                data+=temp
+                if (not temp) or ('finished' in data): break
+            print ("received data:", len(data))
+            if data:
+                #print len(data)
+                data=data.replace('finished','')
 
-            if 'add_account' in data:
-                add_account(data,conn)
+                if 'add_account' in data:
+                    add_account(data,conn)
 
-            elif 'manage_vistors' in data:
-                manage_vistors(data,conn)
+                elif 'manage_vistors' in data:
+                    manage_vistors(data,conn)
 
-            elif 'vistors_accounts' in data:
-                vistors_accounts(data,conn)
+                elif 'vistors_accounts' in data:
+                    vistors_accounts(data,conn)
 
-            elif 'manage_accounts' in data:
-                manage_accounts(data,conn)
+                elif 'manage_accounts' in data:
+                    manage_accounts(data,conn)
 
-            elif 'delete_acc' in data:
-                delete_acc(data)
+                elif 'delete_acc' in data:
+                    delete_acc(data)
 
-            elif 'update_acc' in data:
-                update_acc(data)
-            
-            elif 'add_vistor_to_acc' in data:
-                add_vistor_to_acc(data)
-            
-            elif 'name_to' in data:
-                name_to(data)
-
-
-
+                elif 'update_acc' in data:
+                    update_acc(data)
+                
+                elif 'add_vistor_to_acc' in data:
+                    add_vistor_to_acc(data)
+                
+                elif 'name_to' in data:
+                    name_to(data)
 
 
-    conn.close()
+
+        conn.close()
 
 
 

@@ -26,13 +26,29 @@ def compare_faces(picname):
 	return person_name #returns unknown
 
 
+def phone(name):
+
+	phon=""
+
+	for filename1 in glob.glob('./accounts/*.txt'):
+		myfile = open("filename1", 'w+')
+		lines=myfile.readlines()
+		for line in lines:
+			if name in line:
+				phon=filename1[11:-4]
+				break
+			
+
+		myfile.close()
+		return phon
+		
 
 
 
 
 
 def main():	
-	TCP_IP = ''
+	TCP_IP = '40.112.52.200'
 	TCP_PORT = 25
 
 	c=0
@@ -63,7 +79,7 @@ def main():
 			myfile.close()
 			name=compare_faces('person'+str(c)+'.png')
 			print name
-			conn.sendall(name)
+			conn.sendall(phone(name))
 			data=""
 			c+=1
 
