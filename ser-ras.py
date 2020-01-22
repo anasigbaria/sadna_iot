@@ -13,21 +13,24 @@ import os
 
 #the func takes a photo of a person and returns his name if there is a match in the database
 def compare_faces(picname):
-	unknown=face_recognition.load_image_file('./unknown/'+picname)#the image that we got from the bell
-	num=face_recognition.face_locations(np.array(pic))
-	if len(num)!=1:
+	try:
+		unknown=face_recognition.load_image_file('./unknown/'+picname)#the image that we got from the bell
+		num=face_recognition.face_locations(np.array(pic))
+		if len(num)!=1:
+			return 'error'
+		unknown_encoding=face_recognition.face_encodings(unknown)
+
+
+		person_name='UnknownPerson'
+		for filename in glob.glob('./known/*.png'): #assuming png
+			known_person=face_recognition.load_image_file(filename)
+			known_person_encoding=face_recognition.face_encodings(known_person)
+			if face_recognition.compare_faces(np.array(unknown_encoding),known_person_encoding)[0]:
+				os.remove('./unknown/'+picname)#delete the photo from the unkown persons file
+				return filename[8:len(filename)-4]
+		return person_name #returns unknown
+	except:
 		return 'error'
-	unknown_encoding=face_recognition.face_encodings(unknown)
-
-
-	person_name='UnknownPerson'
-	for filename in glob.glob('./known/*.png'): #assuming png
-		known_person=face_recognition.load_image_file(filename)
-		known_person_encoding=face_recognition.face_encodings(known_person)
-		if face_recognition.compare_faces(np.array(unknown_encoding),known_person_encoding)[0]:
-			os.remove('./unknown/'+picname)#delete the photo from the unkown persons file
-			return filename[8:len(filename)-4]
-	return person_name #returns unknown
 
 
 def phone(name):
