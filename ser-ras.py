@@ -14,7 +14,11 @@ import os
 #the func takes a photo of a person and returns his name if there is a match in the database
 def compare_faces(picname):
 	unknown=face_recognition.load_image_file('./unknown/'+picname)#the image that we got from the bell
+	num=face_recognition.face_locations(np.array(pic))
+	if len(num)!=1:
+		return 'error'
 	unknown_encoding=face_recognition.face_encodings(unknown)
+
 
 	person_name='UnknownPerson'
 	for filename in glob.glob('./known/*.png'): #assuming png
@@ -29,6 +33,8 @@ def compare_faces(picname):
 def phone(name):
 
 	phon=""
+	if name=='error':
+		return 'error'
 
 	for filename1 in glob.glob('./accounts/*.txt'):
 		myfile = open("filename1", 'w+')
@@ -79,7 +85,7 @@ def main():
 			myfile.close()
 			name=compare_faces('person'+str(c)+'.png')
 			print name
-			conn.sendall(phone(name))
+			conn.sendall(name)
 			data=""
 			c+=1
 
